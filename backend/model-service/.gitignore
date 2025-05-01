@@ -1,0 +1,5 @@
+venv/
+**/__pycache__/
+**/*.h5
+model-service/models/*.h5
+*env
