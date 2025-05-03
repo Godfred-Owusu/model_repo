@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Injectable,
@@ -58,6 +59,24 @@ export class UsersService {
     } = savedUser.toObject();
 
     return userWithoutSensitive;
+  }
+
+  async verifyEmailToken(token: string) {
+    const user = await this.user.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+
+    return { message: 'Email verified successfully' };
   }
 
   async findAll(): Promise<User[]> {

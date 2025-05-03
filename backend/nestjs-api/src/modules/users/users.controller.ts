@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -77,5 +78,10 @@ export class UsersController {
   async getUserStatus(@Req() req: Request) {
     console.log(req.user);
     return 'User status: OK';
+  }
+
+  @Get('verify-email')
+  async verifyEmail(@Query('token') token: string) {
+    return this.usersService.verifyEmailToken(token);
   }
 }
