@@ -23,6 +23,9 @@ export class User {
   @Prop({ type: String })
   verificationToken?: string;
 
+  @Prop({ type: Date })
+  verificationTokenExpires?: Date;
+
   @Prop({ type: String })
   passwordResetToken?: string;
 
