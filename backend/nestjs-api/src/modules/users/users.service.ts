@@ -12,12 +12,14 @@ import { Model } from 'mongoose';
 import { UserDto } from './dtos/create-user.dto';
 import { EmailService } from '../email/email.service';
 import * as crypto from 'crypto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private user: Model<User>,
     private emailService: EmailService,
+    private configService: ConfigService,
   ) {}
 
   async createUser(@Body() userDto: UserDto): Promise<any> {
@@ -31,12 +33,14 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
+    const frontendLink = this.configService.get<string>('APP_URL');
+    const verificationLink = `${frontendLink}/verify-email?token=${verificationToken}`;
     const verificationTokenExpires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
 
     await this.emailService.verifyEmail(
       userDto.firstName,
       email,
-      verificationToken,
+      verificationLink,
     );
 
     // Create and save the new user

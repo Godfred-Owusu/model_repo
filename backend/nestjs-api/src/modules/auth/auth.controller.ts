@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   NotFoundException,
   Post,
   Req,
@@ -8,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LocalGuard } from './guards/local.guard';
 import { Request } from 'express';
+import { JwtGuard } from './guards/jwt.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -40,6 +42,14 @@ export class AuthController {
   @Post('login')
   @UseGuards(LocalGuard)
   login(@Req() req: Request) {
-    return req.user;
+    return { token: req.user };
+  }
+
+  @ApiOperation({ summary: 'Validate token' })
+  @ApiResponse({ description: 'Token is valid' })
+  @Get('validate')
+  @UseGuards(JwtGuard)
+  validateToken(@Req() req: Request) {
+    return { message: 'Token is valid', user: req.user };
   }
 }

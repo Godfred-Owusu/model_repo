@@ -62,6 +62,7 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+        <h1 className="text-3xl text-red-500">hello</h1>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
