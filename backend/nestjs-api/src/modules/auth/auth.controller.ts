@@ -5,13 +5,14 @@ import {
   NotFoundException,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LocalGuard } from './guards/local.guard';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { JwtGuard } from './guards/jwt.guard';
 
 @ApiTags('auth')
@@ -41,8 +42,10 @@ export class AuthController {
   })
   @Post('login')
   @UseGuards(LocalGuard)
-  login(@Req() req: Request) {
-    return { token: req.user };
+  login(@Req() req: Request, @Res({ passthrough: true }) response: Response) {
+    const user = req.user;
+    response.cookie('token', req.user, { httpOnly: true, secure: true });
+    return { message: 'Login successful' };
   }
 
   @ApiOperation({ summary: 'Validate token' })
@@ -51,5 +54,27 @@ export class AuthController {
   @UseGuards(JwtGuard)
   validateToken(@Req() req: Request) {
     return { message: 'Token is valid', user: req.user };
+  }
+
+  @Get('user')
+  async getUser(@Req() req: Request) {
+    const cookie = req.cookies['token'];
+    return this.authService.getUser(cookie);
+  }
+
+  // is userVerified
+  @Get('is-user-verified')
+  async isUserVerified(@Req() req: Request) {
+    const cookie = req.cookies['token'];
+    const user = await this.authService.getUser(cookie);
+    if (!user.isVerified) return { message: 'User is not verified' };
+    return { message: 'User is verified' };
+  }
+
+  @ApiOperation({ summary: 'Logout user' })
+  @Get('logout')
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('token');
+    return { message: 'Logout successful' };
   }
 }
