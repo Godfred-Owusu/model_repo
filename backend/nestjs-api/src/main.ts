@@ -12,7 +12,15 @@ async function bootstrap() {
     origin: 'http://localhost:3000', // Explicitly allow the Next.js frontend origin
     credentials: true, // Allow cookies to be sent with requests
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+    allowedHeaders: [
+      'Accept',
+      'Authorization',
+      'Content-Type',
+      'X-Requested-With',
+      'Range',
+      'credentials', // Add this if you specifically need the credentials header
+    ],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
 
   const config = new DocumentBuilder()

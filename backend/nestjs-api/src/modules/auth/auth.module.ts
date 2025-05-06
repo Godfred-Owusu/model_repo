@@ -9,6 +9,8 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { LocalGuard } from './guards/local.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { EmailModule } from '../email/email.module';
+import { EmailService } from '../email/email.service';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       }),
     }),
     UsersModule,
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, LocalGuard, JwtStrategy],

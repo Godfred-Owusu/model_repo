@@ -44,7 +44,14 @@ export class AuthController {
   @UseGuards(LocalGuard)
   login(@Req() req: Request, @Res({ passthrough: true }) response: Response) {
     const user = req.user;
-    response.cookie('token', req.user, { httpOnly: true, secure: true });
+    if (!user) {
+      throw new NotFoundException('Account not found, please register');
+    }
+    response.cookie('token', req.user, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+    });
     return { message: 'Login successful' };
   }
 
@@ -57,18 +64,26 @@ export class AuthController {
   }
 
   @Get('user')
-  async getUser(@Req() req: Request) {
+  async getUserFromCookie(@Req() req: Request) {
     const cookie = req.cookies['token'];
-    return this.authService.getUser(cookie);
+    return this.authService.getUserFromJwt(cookie);
   }
 
   // is userVerified
+  @ApiOperation({ summary: 'Check if user is verified' })
+  @ApiResponse({ description: 'User is verified' })
   @Get('is-user-verified')
   async isUserVerified(@Req() req: Request) {
     const cookie = req.cookies['token'];
-    const user = await this.authService.getUser(cookie);
-    if (!user.isVerified) return { message: 'User is not verified' };
-    return { message: 'User is verified' };
+    const user = await this.authService.getUserFromJwt(cookie);
+    if (!user.isVerified) return { status: false };
+    return { status: true };
+  }
+
+  @Get('get-email')
+  async getemailFromCookie(@Req() req: Request) {
+    const cookie = req.cookies['token'];
+    return this.authService.getemailFromJwt(cookie);
   }
 
   @ApiOperation({ summary: 'Logout user' })
